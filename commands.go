@@ -20,7 +20,7 @@ type Cell struct {
 	pos   int
 }
 
-type Dir uint8
+type Dir int8
 
 const (
 	UP Dir = iota
@@ -114,7 +114,7 @@ func getSnake(req *MoveRequest, id string) Snake {
 	return Snake{}
 }
 
-func safeMove(data *TurnData, dir Dir) bool {
+func safeMove(data *TurnData, dir Dir) int {
 	req := data.req
 	board := data.board
 	myhead := data.mysnake.Coords[0]
@@ -163,26 +163,31 @@ func safeMove(data *TurnData, dir Dir) bool {
 			testCells = append(testCells, &board[myhead.Y+1][myhead.X+1])
 		}
 	} else {
-		return false
+		return 0
 	}
 
 	for _, cell := range testCells {
 		if cell.t == SNAKE && cell.pos == 0 && mylen <= len(getSnake(req, cell.snake).Coords) {
-			return false
+			return 1
 		}
 	}
 
-	return true
+	return 2
 }
 
 func firstSafeDir(data *TurnData) Dir {
 	var dir Dir
+	var risky Dir
 	for dir = UP; dir < num_dirs; dir++ {
-		if safeMove(data, dir) {
-			break
+		safety := safeMove(data, dir)
+		if safety == 2 {
+			return dir
+		} else if safety == 1 {
+			risky = dir
 		}
 	}
-	return dir
+
+	return risky
 }
 
 func findFood(data *TurnData) Dir {
@@ -206,20 +211,46 @@ func findFood(data *TurnData) Dir {
 	x_dist := myhead.X - shortest.X
 	y_dist := myhead.Y - shortest.Y
 
-	if x_dist < 0 && safeMove(data, RIGHT) { // go right
-		return RIGHT
+	risky := Dir(-1)
+
+	if x_dist < 0 { // go right
+		safety := safeMove(data, RIGHT)
+		if safety == 2 {
+			return RIGHT
+		} else if safety == 1 && risky < 0 {
+			risky = RIGHT
+		}
 	}
-	if x_dist > 0 && safeMove(data, LEFT) { // go left
-		return LEFT
+	if x_dist > 0 { // go left
+		safety := safeMove(data, LEFT)
+		if safety == 2 {
+			return LEFT
+		} else if safety == 1 && risky < 0 {
+			risky = LEFT
+		}
 	}
-	if y_dist < 0 && safeMove(data, DOWN) { //go down
-		return DOWN
+	if y_dist < 0 { //go down
+		safety := safeMove(data, DOWN)
+		if safety == 2 {
+			return DOWN
+		} else if safety == 1 && risky < 0 {
+			risky = DOWN
+		}
 	}
-	if y_dist < 0 && safeMove(data, UP) { //go down
-		return UP
+	if y_dist < 0 { //go down
+		safety := safeMove(data, UP)
+		if safety == 2 {
+			return UP
+		} else if safety == 1 && risky < 0 {
+			risky = UP
+		}
 	}
 
-	return firstSafeDir(data)
+	if risky < 0 {
+		return firstSafeDir(data)
+	} else {
+		return risky
+	}
 
 }
 
