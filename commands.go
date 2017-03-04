@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	_ "github.com/beefsack/go-astar"
 	"net/http"
 )
 
@@ -71,7 +72,7 @@ func AStar(head Point, go_to Point, data TurnData) Point {
 	// cost to get to individual point
 	// access point as go_score[i][j] = go_score[i*width + j]
 	go_score := make([]int, height*width)
-	go_score[start.y*width+start.x] = 0
+	go_score[head.Y*width+head.X] = 0
 	//cost of travelling to go_to through the point
 	through_score := make([]int, height*width)
 	through_score[start.y*width+start.x] = heuristic_cost(head, go_to)
