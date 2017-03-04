@@ -1,8 +1,12 @@
 {
 	"ImportPath": "github.com/DigitalCoffee/battlesnake-go",
-	"GoVersion": "go1.7",
+	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
 	"Deps": [
+		{
+			"ImportPath": "github.com/beefsack/go-astar",
+			"Rev": "d4c347ecb8fe13d807dbe9e9dcf6ceaa2ef48fb7"
+		},
 		{
 			"ImportPath": "gopkg.in/go-playground/assert.v1",
 			"Comment": "v1.2.1",
