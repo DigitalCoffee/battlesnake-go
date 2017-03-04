@@ -8,31 +8,47 @@ import (
 	"time"
 )
 
-type Square interface{}
+type CellType uint8
 
-type Body struct {
+const (
+	empty CellType = iota
+	snake
+	food
+)
+
+type Cell struct{
+	t CellType
 	snake string
 	pos   int
 }
 
-type Space struct{}
-type Food struct{}
+const (
+	up = iota
+	right
+	down
+	left
+)
 
-//type Coin struct{}
+const directions = [..]string{
+		up: "up",
+		down: "down",
+		left: "left",
+		right: "right",
+	}
 
-func buildBoard(req MoveRequest) (board [][]Square) {
-	board = make([][]Square, req.Width)
+func buildBoard(req MoveRequest) (board [][]Cell) {
+	board = make([][]Cell, req.Width)
 	for i := range board {
-		board[i] = make([]Square, req.Height)
+		board[i] = make([]Cell, req.Height)
 	}
 
 	for _, food := range req.Food {
-		board[food.Y][food.X] = Food{}
+		board[food.Y][food.X].t = food
 	}
 
-	for _, snake := range req.Snakes {
-		for i, body := range snake.Coords {
-			board[body.Y][body.X] = Body{snake: snake.Id, pos: i}
+	for _, cur_snake := range req.Snakes {
+		for i, body := range cur_snake.Coords {
+			board[body.Y][body.X] = Cell{t: snake, snake: cur_snake.Id, pos: i}
 		}
 	}
 	return board
@@ -84,6 +100,15 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		})
 		return
 	}
+	
+	board := buildBoard(data)
+	myhead := getSnake(data, data.You).Coords[0]
+	
+	dir := 0
+	
+	if myhead.Y > 0 && board[myhead.Y-1][myhead.X].t != snake {
+		dir 
+	}
 
 	directions := []string{
 		"up",
@@ -95,7 +120,7 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	respond(res, MoveResponse{
-		Move:  directions[r.Intn(4)],
+		Move:  directions[dir],
 		Taunt: &data.You,
 	})
 }
