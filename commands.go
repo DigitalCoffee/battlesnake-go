@@ -8,6 +8,45 @@ import (
 	"time"
 )
 
+type Square interface{}
+
+type Body struct {
+	snake string
+	pos   int
+}
+
+type Space struct{}
+type Food struct{}
+
+//type Coin struct{}
+
+func buildBoard(req MoveRequest) (board [][]Square) {
+	board = make([][]Square, req.Width)
+	for i := range board {
+		board[i] = make([]Square, req.Height)
+	}
+
+	for _, food := range req.Food {
+		board[food.Y][food.X] = Food{}
+	}
+
+	for _, snake := range req.Snakes {
+		for i, body := range snake.Coords {
+			board[body.Y][body.X] = Body{snake: snake.Id, pos: i}
+		}
+	}
+	return board
+}
+
+func getSnake(req MoveRequest, id string) Snake {
+	for _, snake := range req.Snakes {
+		if snake.Id == id {
+			return snake
+		}
+	}
+	return Snake{}
+}
+
 func respond(res http.ResponseWriter, obj interface{}) {
 	res.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(res).Encode(obj)
