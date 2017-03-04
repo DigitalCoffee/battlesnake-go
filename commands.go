@@ -2,9 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	//"fmt"
 	astar "github.com/beefsack/go-astar"
+	"log"
 	"net/http"
+	"time"
 )
 
 type CellType uint8
@@ -310,6 +311,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 }
 
 func handleMove(res http.ResponseWriter, req *http.Request) {
+	timer := time.Now()
 	data, err := NewMoveRequest(req)
 	if err != nil {
 		respond(res, MoveResponse{
@@ -328,4 +330,8 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		Move:  directions[dir],
 		Taunt: &data.You,
 	})
+	t := time.Since(timer)
+	if t >= 200*time.Millisecond {
+		log.Println("Timed out: ", t)
+	}
 }
