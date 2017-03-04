@@ -188,7 +188,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 	data, err := NewGameStartRequest(req)
 	if err != nil {
 		respond(res, GameStartResponse{
-			Taunt:   toStringPointer("battlesnake-go!"),
+			Taunt:   toStringPointer("Whoa dude"),
 			Color:   "#00FF00",
 			Name:    "Skate Fast Eat Gushers",
 			HeadUrl: toStringPointer(fmt.Sprintf("%v://%v/static/head.png")),
@@ -200,7 +200,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 		scheme = "https"
 	}
 	respond(res, GameStartResponse{
-		Taunt:   toStringPointer("battlesnake-go!"),
+		Taunt:   toStringPointer("Whoa dude"),
 		Color:   "#00FF00",
 		Name:    "Skate Fast Eat Gushers",
 		HeadUrl: toStringPointer(fmt.Sprintf("%v://%v/static/head.png", scheme, req.Host)),
