@@ -71,7 +71,7 @@ func getSnake(req *MoveRequest, id string) Snake {
 }
 
 func safeMove(data *TurnData, dir Dir) bool {
-	req := data.MoveRequest
+	req := data.req
 	board := data.board
 	myhead := data.myhead
 
@@ -125,7 +125,7 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	turnData := &TurnData{req: data, board: buildBoard(data), myhead: getSnake(data, data.You)[0]}
+	turnData := &TurnData{req: data, board: buildBoard(data), myhead: getSnake(data, data.You).Coords[0]}
 
 	var dir Dir
 	for dir = UP; dir < num_dirs; dir++ {
