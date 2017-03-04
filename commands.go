@@ -259,7 +259,7 @@ func findFood(data *TurnData) Dir {
 			risky = DOWN
 		}
 	}
-	if y_dist < 0 { //go down
+	if y_dist > 0 { //go up
 		safety := safeMove(data, UP)
 		if safety == 2 {
 			return UP
