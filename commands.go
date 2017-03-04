@@ -38,9 +38,9 @@ var directions = [4]string{
 }
 
 type TurnData struct {
-	req    *MoveRequest
-	board  [][]Cell
-	myhead Point
+	req     *MoveRequest
+	board   [][]Cell
+	mysnake *Snake
 }
 
 func buildBoard(req *MoveRequest) (board [][]Cell) {
@@ -73,18 +73,110 @@ func getSnake(req *MoveRequest, id string) Snake {
 func safeMove(data *TurnData, dir Dir) bool {
 	req := data.req
 	board := data.board
-	myhead := data.myhead
+	myhead := data.mysnake.Coords[0]
+	mylen := len(data.mysnake.Coords)
+
+	testCells := make([]*Cell, 0, 3)
 
 	if dir == UP && myhead.Y > 0 && board[myhead.Y-1][myhead.X].t != SNAKE {
-		return true
+		if myhead.X > 0 {
+			testCells = append(testCells, &board[myhead.Y-1][myhead.X-1])
+		}
+		if myhead.Y > 1 {
+			testCells = append(testCells, &board[myhead.Y-2][myhead.X])
+		}
+		if myhead.X < req.Width-1 {
+			testCells = append(testCells, &board[myhead.Y-1][myhead.X+1])
+		}
 	} else if dir == DOWN && myhead.Y < req.Height-1 && board[myhead.Y+1][myhead.X].t != SNAKE {
-		return true
+		if myhead.X > 0 {
+			testCells = append(testCells, &board[myhead.Y+1][myhead.X-1])
+		}
+		if myhead.Y < req.Height-2 {
+			testCells = append(testCells, &board[myhead.Y+2][myhead.X])
+		}
+		if myhead.X < req.Width-1 {
+			testCells = append(testCells, &board[myhead.Y+1][myhead.X+1])
+		}
 	} else if dir == LEFT && myhead.X > 0 && board[myhead.Y][myhead.X-1].t != SNAKE {
-		return true
+		if myhead.Y > 0 {
+			testCells = append(testCells, &board[myhead.Y-1][myhead.X+1])
+		}
+		if myhead.X < req.Width-2 {
+			testCells = append(testCells, &board[myhead.Y][myhead.X+2])
+		}
+		if myhead.Y < req.Height-1 {
+			testCells = append(testCells, &board[myhead.Y+1][myhead.X+1])
+		}
 	} else if dir == RIGHT && myhead.X < req.Width-1 && board[myhead.Y][myhead.X+1].t != SNAKE {
-		return true
+		if myhead.Y > 0 {
+			testCells = append(testCells, &board[myhead.Y-1][myhead.X-1])
+		}
+		if myhead.X > 1 {
+			testCells = append(testCells, &board[myhead.Y][myhead.X-2])
+		}
+		if myhead.Y < req.Height-1 {
+			testCells = append(testCells, &board[myhead.Y+1][myhead.X-1])
+		}
+	} else {
+		return false
 	}
-	return false
+
+	for _, cell := range testCells {
+		if cell.t == SNAKE && cell.pos == 0 && mylen <= len(getSnake(req, cell.snake).Coords) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func firstSafeDir(data *TurnData) Dir {
+	var dir Dir
+	for dir = UP; dir < num_dirs; dir++ {
+		if safeMove(data, dir) {
+			break
+		}
+	}
+	return dir
+}
+
+func findFood(data *TurnData) Dir {
+	shortest := Point{-1, -1}
+	food_list := data.req.Food
+	myhead := data.mysnake.Coords[0]
+	short_dist := -1
+
+	if len(food_list) == 0 {
+		return firstSafeDir(data)
+	}
+
+	for _, food := range food_list {
+		dist := food.X + food.Y - (myhead.X + myhead.Y)
+		if dist < short_dist || short_dist == -1 {
+			shortest = food
+			short_dist = dist
+		}
+	}
+
+	x_dist := myhead.X - shortest.X
+	y_dist := myhead.Y - shortest.Y
+
+	if x_dist < 0 && safeMove(data, RIGHT) { // go right
+		return RIGHT
+	}
+	if x_dist > 0 && safeMove(data, LEFT) { // go left
+		return LEFT
+	}
+	if y_dist < 0 && safeMove(data, DOWN) { //go down
+		return DOWN
+	}
+	if y_dist < 0 && safeMove(data, DOWN) { //go down
+		return UP
+	}
+
+	return firstSafeDir(data)
+
 }
 
 func respond(res http.ResponseWriter, obj interface{}) {
@@ -125,14 +217,10 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	turnData := &TurnData{req: data, board: buildBoard(data), myhead: getSnake(data, data.You).Coords[0]}
+	snake := getSnake(data, data.You)
+	turnData := &TurnData{req: data, board: buildBoard(data), mysnake: &snake}
 
-	var dir Dir
-	for dir = UP; dir < num_dirs; dir++ {
-		if safeMove(turnData, dir) {
-			break
-		}
-	}
+	dir := findFood(turnData)
 
 	respond(res, MoveResponse{
 		Move:  directions[dir],
