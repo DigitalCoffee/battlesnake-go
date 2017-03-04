@@ -37,6 +37,12 @@ var directions = [4]string{
 	RIGHT: "right",
 }
 
+type TurnData struct {
+	req    *MoveRequest
+	board  [][]Cell
+	myhead Point
+}
+
 func buildBoard(req *MoveRequest) (board [][]Cell) {
 	board = make([][]Cell, req.Width)
 	for i := range board {
@@ -64,9 +70,10 @@ func getSnake(req *MoveRequest, id string) Snake {
 	return Snake{}
 }
 
-func safeMove(req *MoveRequest, dir Dir) bool {
-	board := buildBoard(req)
-	myhead := getSnake(req, req.You).Coords[0]
+func safeMove(data *TurnData, dir Dir) bool {
+	req := data.MoveRequest
+	board := data.board
+	myhead := data.myhead
 
 	if dir == UP && myhead.Y > 0 && board[myhead.Y-1][myhead.X].t != SNAKE {
 		return true
@@ -118,9 +125,11 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	turnData := &TurnData{req: data, board: buildBoard(data), myhead: getSnake(data, data.You)[0]}
+
 	var dir Dir
 	for dir = UP; dir < num_dirs; dir++ {
-		if safeMove(data, dir) {
+		if safeMove(turnData, dir) {
 			break
 		}
 	}
