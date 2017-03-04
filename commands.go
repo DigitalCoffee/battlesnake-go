@@ -72,7 +72,7 @@ func safeMove(req *MoveRequest, dir Dir) bool {
 		return true
 	} else if dir == DOWN && myhead.Y < req.Height-1 && board[myhead.Y+1][myhead.X].t != SNAKE {
 		return true
-	} else if dir == LEFT && myhead.X < 0 && board[myhead.Y][myhead.X-1].t != SNAKE {
+	} else if dir == LEFT && myhead.X > 0 && board[myhead.Y][myhead.X-1].t != SNAKE {
 		return true
 	} else if dir == RIGHT && myhead.X < req.Width-1 && board[myhead.Y][myhead.X+1].t != SNAKE {
 		return true
