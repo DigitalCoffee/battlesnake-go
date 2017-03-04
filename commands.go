@@ -20,18 +20,21 @@ type Cell struct {
 	pos   int
 }
 
+type Dir uint8
+
 const (
-	up = iota
-	right
-	down
-	left
+	UP Dir = iota
+	RIGHT
+	DOWN
+	LEFT
+	num_dirs
 )
 
 var directions = [4]string{
-	up:    "up",
-	down:  "down",
-	left:  "left",
-	right: "right",
+	UP:    "up",
+	DOWN:  "down",
+	LEFT:  "left",
+	RIGHT: "right",
 }
 
 func buildBoard(req *MoveRequest) (board [][]Cell) {
@@ -59,6 +62,22 @@ func getSnake(req *MoveRequest, id string) Snake {
 		}
 	}
 	return Snake{}
+}
+
+func safeMove(req *MoveRequest, dir Dir) bool {
+	board := buildBoard(req)
+	myhead := getSnake(req, req.You).Coords[0]
+
+	if dir == UP && myhead.Y > 0 && board[myhead.Y-1][myhead.X].t != SNAKE {
+		return true
+	} else if dir == DOWN && myhead.Y < req.Height-1 && board[myhead.Y+1][myhead.X].t != SNAKE {
+		return true
+	} else if dir == LEFT && myhead.X < 0 && board[myhead.Y][myhead.X-1].t != SNAKE {
+		return true
+	} else if dir == RIGHT && myhead.X < req.Width-1 && board[myhead.Y][myhead.X+1].t != SNAKE {
+		return true
+	}
+	return false
 }
 
 func respond(res http.ResponseWriter, obj interface{}) {
@@ -99,19 +118,11 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	board := buildBoard(data)
-	myhead := getSnake(data, data.You).Coords[0]
-
-	dir := 0
-
-	if myhead.Y > 0 && board[myhead.Y-1][myhead.X].t != SNAKE {
-		dir = up
-	} else if myhead.Y < data.Height-1 && board[myhead.Y+1][myhead.X].t != SNAKE {
-		dir = down
-	} else if myhead.X < 0 && board[myhead.Y][myhead.X-1].t != SNAKE {
-		dir = left
-	} else if myhead.X < data.Width-1 && board[myhead.Y][myhead.X+1].t != SNAKE {
-		dir = right
+	var dir Dir
+	for dir = UP; dir < num_dirs; dir++ {
+		if safeMove(data, dir) {
+			break
+		}
 	}
 
 	respond(res, MoveResponse{
