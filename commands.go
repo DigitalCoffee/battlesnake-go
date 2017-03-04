@@ -146,7 +146,7 @@ func safeMove(data *TurnData, dir Dir) int {
 		if myhead.Y > 0 {
 			testCells = append(testCells, &board[myhead.Y-1][myhead.X-1])
 		}
-		if myhead.X < req.Width-2 {
+		if myhead.X > 1 {
 			testCells = append(testCells, &board[myhead.Y][myhead.X-2])
 		}
 		if myhead.Y < req.Height-1 {
@@ -156,7 +156,7 @@ func safeMove(data *TurnData, dir Dir) int {
 		if myhead.Y > 0 {
 			testCells = append(testCells, &board[myhead.Y-1][myhead.X+1])
 		}
-		if myhead.X > 1 {
+		if myhead.X < req.Width-2 {
 			testCells = append(testCells, &board[myhead.Y][myhead.X+2])
 		}
 		if myhead.Y < req.Height-1 {
