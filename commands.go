@@ -43,6 +43,50 @@ type TurnData struct {
 	mysnake *Snake
 }
 
+func abs(i int) int {
+	if i < 0 {
+		return -i
+	} else {
+		return i
+	}
+}
+
+func heuristic_cost(start Point, end Point) int {
+	return abs(start.X-end.X) + abs(start.Y-end.Y)
+
+}
+
+/*
+func AStar(head Point, go_to Point, data TurnData) Point {
+
+	// Reference: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
+
+	//Setup
+
+	width := data.req.Width
+	height := data.req.Height
+
+	closedSet := []Point{}
+	openSet := []Point{start}
+	// cost to get to individual point
+	// access point as go_score[i][j] = go_score[i*width + j]
+	go_score := make([]int, height*width)
+	go_score[start.y*width+start.x] = 0
+	//cost of travelling to go_to through the point
+	through_score := make([]int, height*width)
+	through_score[start.y*width+start.x] = heuristic_cost(head, go_to)
+
+	// Computation
+	for len(openSet) > 0 {
+
+	}
+	return Point{-1, -1}
+}*/
+
+func reconstruct_path(from Point, current Point) Point {
+	return Point{-1, -1}
+}
+
 func buildBoard(req *MoveRequest) (board [][]Cell) {
 	board = make([][]Cell, req.Width)
 	for i := range board {
@@ -185,7 +229,7 @@ func respond(res http.ResponseWriter, obj interface{}) {
 }
 
 func handleStart(res http.ResponseWriter, req *http.Request) {
-	data, err := NewGameStartRequest(req)
+	_, err := NewGameStartRequest(req)
 	if err != nil {
 		respond(res, GameStartResponse{
 			Taunt:   toStringPointer("Whoa dude"),
