@@ -67,7 +67,7 @@ func AStar(head Point, go_to Point, data TurnData) Point {
 	height := data.req.Height
 
 	closedSet := []Point{}
-	openSet := []Point{start}
+	openSet := []Point{head}
 	// cost to get to individual point
 	// access point as go_score[i][j] = go_score[i*width + j]
 	go_score := make([]int, height*width)
@@ -78,7 +78,7 @@ func AStar(head Point, go_to Point, data TurnData) Point {
 
 	// Computation
 	for len(openSet) > 0 {
-
+		// current := the node in openSet having the lowest fScore[] value
 	}
 	return Point{-1, -1}
 }*/
@@ -166,13 +166,25 @@ func safeMove(data *TurnData, dir Dir) int {
 		return 0
 	}
 
+	all_tests := true
+	possible := false
+
 	for _, cell := range testCells {
+		if cell.t != SNAKE || cell.pos == len(getSnake(req, cell.snake).Coords)-1 {
+			all_tests = false
+		}
 		if cell.t == SNAKE && cell.pos == 0 && mylen <= len(getSnake(req, cell.snake).Coords) {
-			return 1
+			possible = true
 		}
 	}
 
-	return 2
+	if all_tests {
+		return 0
+	} else if possible {
+		return 1
+	} else {
+		return 2
+	}
 }
 
 func firstSafeDir(data *TurnData) Dir {
