@@ -190,7 +190,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 		respond(res, GameStartResponse{
 			Taunt:   toStringPointer("battlesnake-go!"),
 			Color:   "#00FF00",
-			Name:    fmt.Sprintf("%v (%vx%v)", data.GameId, data.Width, data.Height),
+			Name:    "Skate Fast Eat Gushers",
 			HeadUrl: toStringPointer(fmt.Sprintf("%v://%v/static/head.png")),
 		})
 	}
@@ -202,7 +202,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 	respond(res, GameStartResponse{
 		Taunt:   toStringPointer("battlesnake-go!"),
 		Color:   "#00FF00",
-		Name:    fmt.Sprintf("%v (%vx%v)", data.GameId, data.Width, data.Height),
+		Name:    "Skate Fast Eat Gushers",
 		HeadUrl: toStringPointer(fmt.Sprintf("%v://%v/static/head.png", scheme, req.Host)),
 	})
 }
