@@ -219,7 +219,8 @@ func findFood(data *TurnData) Dir {
 	short_dist := -1
 
 	if len(food_list) == 0 {
-		return firstSafeDir(data)
+		dir, _ := firstSafeDir(data)
+		return dir
 	}
 
 	for _, food := range food_list {
