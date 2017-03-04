@@ -144,23 +144,23 @@ func safeMove(data *TurnData, dir Dir) bool {
 		}
 	} else if dir == LEFT && myhead.X > 0 && board[myhead.Y][myhead.X-1].t != SNAKE {
 		if myhead.Y > 0 {
-			testCells = append(testCells, &board[myhead.Y-1][myhead.X+1])
-		}
-		if myhead.X < req.Width-2 {
-			testCells = append(testCells, &board[myhead.Y][myhead.X+2])
-		}
-		if myhead.Y < req.Height-1 {
-			testCells = append(testCells, &board[myhead.Y+1][myhead.X+1])
-		}
-	} else if dir == RIGHT && myhead.X < req.Width-1 && board[myhead.Y][myhead.X+1].t != SNAKE {
-		if myhead.Y > 0 {
 			testCells = append(testCells, &board[myhead.Y-1][myhead.X-1])
 		}
-		if myhead.X > 1 {
+		if myhead.X < req.Width-2 {
 			testCells = append(testCells, &board[myhead.Y][myhead.X-2])
 		}
 		if myhead.Y < req.Height-1 {
 			testCells = append(testCells, &board[myhead.Y+1][myhead.X-1])
+		}
+	} else if dir == RIGHT && myhead.X < req.Width-1 && board[myhead.Y][myhead.X+1].t != SNAKE {
+		if myhead.Y > 0 {
+			testCells = append(testCells, &board[myhead.Y-1][myhead.X+1])
+		}
+		if myhead.X > 1 {
+			testCells = append(testCells, &board[myhead.Y][myhead.X+2])
+		}
+		if myhead.Y < req.Height-1 {
+			testCells = append(testCells, &board[myhead.Y+1][myhead.X+1])
 		}
 	} else {
 		return false
@@ -215,7 +215,7 @@ func findFood(data *TurnData) Dir {
 	if y_dist < 0 && safeMove(data, DOWN) { //go down
 		return DOWN
 	}
-	if y_dist < 0 && safeMove(data, DOWN) { //go down
+	if y_dist < 0 && safeMove(data, UP) { //go down
 		return UP
 	}
 
