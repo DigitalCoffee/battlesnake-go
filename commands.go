@@ -230,20 +230,64 @@ func findFood(data *TurnData) Dir {
 		}
 	}
 
-	p, found := AStar(myhead, shortest, data)
+	x_dist := myhead.X - shortest.X
+	y_dist := myhead.Y - shortest.Y
 
-	if !found {
-		return firstSafeDir(data)
-	} else if p.X == myhead.X-1 {
-		return LEFT
-	} else if p.X == myhead.X+1 {
-		return RIGHT
-	} else if p.Y == myhead.Y-1 {
-		return UP
-	} else if p.Y == myhead.Y+1 {
-		return DOWN
+	risky := Dir(-1)
+
+	if x_dist < 0 { // go right
+		safety := safeMove(data, RIGHT)
+		if safety == 2 {
+			return RIGHT
+		} else if safety == 1 && risky < 0 {
+			risky = RIGHT
+		}
 	}
-	return firstSafeDir(data)
+	if x_dist > 0 { // go left
+		safety := safeMove(data, LEFT)
+		if safety == 2 {
+			return LEFT
+		} else if safety == 1 && risky < 0 {
+			risky = LEFT
+		}
+	}
+	if y_dist < 0 { //go down
+		safety := safeMove(data, DOWN)
+		if safety == 2 {
+			return DOWN
+		} else if safety == 1 && risky < 0 {
+			risky = DOWN
+		}
+	}
+	if y_dist < 0 { //go down
+		safety := safeMove(data, UP)
+		if safety == 2 {
+			return UP
+		} else if safety == 1 && risky < 0 {
+			risky = UP
+		}
+	}
+
+	if risky < 0 {
+		return firstSafeDir(data)
+	} else {
+		return risky
+	} /*
+
+		p, found := AStar(myhead, shortest, data)
+
+		if !found {
+			return firstSafeDir(data)
+		} else if p.X == myhead.X-1 {
+			return LEFT
+		} else if p.X == myhead.X+1 {
+			return RIGHT
+		} else if p.Y == myhead.Y-1 {
+			return UP
+		} else if p.Y == myhead.Y+1 {
+			return DOWN
+		}
+		return firstSafeDir(data)*/
 }
 
 func respond(res http.ResponseWriter, obj interface{}) {
