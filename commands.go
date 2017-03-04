@@ -235,36 +235,39 @@ func findFood(data *TurnData) Dir {
 
 	risky := Dir(-1)
 
-	if x_dist < 0 { // go right
-		safety := safeMove(data, RIGHT)
-		if safety == 2 {
-			return RIGHT
-		} else if safety == 1 && risky < 0 {
-			risky = RIGHT
+	if x_dist <= y_dist {
+		if x_dist < 0 { // go right
+			safety := safeMove(data, RIGHT)
+			if safety == 2 {
+				return RIGHT
+			} else if safety == 1 && risky < 0 {
+				risky = RIGHT
+			}
 		}
-	}
-	if x_dist > 0 { // go left
-		safety := safeMove(data, LEFT)
-		if safety == 2 {
-			return LEFT
-		} else if safety == 1 && risky < 0 {
-			risky = LEFT
+		if x_dist > 0 { // go left
+			safety := safeMove(data, LEFT)
+			if safety == 2 {
+				return LEFT
+			} else if safety == 1 && risky < 0 {
+				risky = LEFT
+			}
 		}
-	}
-	if y_dist < 0 { //go down
-		safety := safeMove(data, DOWN)
-		if safety == 2 {
-			return DOWN
-		} else if safety == 1 && risky < 0 {
-			risky = DOWN
+	} else {
+		if y_dist < 0 { //go down
+			safety := safeMove(data, DOWN)
+			if safety == 2 {
+				return DOWN
+			} else if safety == 1 && risky < 0 {
+				risky = DOWN
+			}
 		}
-	}
-	if y_dist > 0 { //go up
-		safety := safeMove(data, UP)
-		if safety == 2 {
-			return UP
-		} else if safety == 1 && risky < 0 {
-			risky = UP
+		if y_dist > 0 { //go up
+			safety := safeMove(data, UP)
+			if safety == 2 {
+				return UP
+			} else if safety == 1 && risky < 0 {
+				risky = UP
+			}
 		}
 	}
 
