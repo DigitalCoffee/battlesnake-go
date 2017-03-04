@@ -197,19 +197,19 @@ func safeMove(data *TurnData, dir Dir) int {
 	}
 }
 
-func firstSafeDir(data *TurnData) Dir {
+func firstSafeDir(data *TurnData) (Dir, int) {
 	var dir Dir
 	var risky Dir
 	for dir = UP; dir < num_dirs; dir++ {
 		safety := safeMove(data, dir)
 		if safety == 2 {
-			return dir
+			return dir, 2
 		} else if safety == 1 {
 			risky = dir
 		}
 	}
 
-	return risky
+	return risky, 1
 }
 
 func findFood(data *TurnData) Dir {
@@ -271,10 +271,11 @@ func findFood(data *TurnData) Dir {
 		}
 	}
 
-	if risky < 0 {
-		return firstSafeDir(data)
-	} else {
+	dir, safety := firstSafeDir(data)
+	if risky >= 0 && safety == 1 {
 		return risky
+	} else {
+		return dir
 	} /*
 
 		p, found := AStar(myhead, shortest, data)
