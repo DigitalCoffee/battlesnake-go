@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	_ "github.com/beefsack/go-astar"
+	astar "github.com/beefsack/go-astar"
 	"net/http"
 )
 
@@ -57,35 +57,44 @@ func heuristic_cost(start Point, end Point) int {
 
 }
 
-/*
-func AStar(head Point, go_to Point, data TurnData) Point {
+type Path struct {
+	p             Point
+	g             [][]Cell
+	height, width int
+}
 
-	// Reference: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
-
-	//Setup
-
-	width := data.req.Width
-	height := data.req.Height
-
-	closedSet := []Point{}
-	openSet := []Point{head}
-	// cost to get to individual point
-	// access point as go_score[i][j] = go_score[i*width + j]
-	go_score := make([]int, height*width)
-	go_score[head.Y*width+head.X] = 0
-	//cost of travelling to go_to through the point
-	through_score := make([]int, height*width)
-	through_score[start.y*width+start.x] = heuristic_cost(head, go_to)
-
-	// Computation
-	for len(openSet) > 0 {
-		// current := the node in openSet having the lowest fScore[] value
+func (p *Path) PathNeighbors() []astar.Pather {
+	neighbors := make([]astar.Pather, 0, 4)
+	if p.p.X > 0 && p.g[p.p.Y][p.p.X-1].t != SNAKE {
+		neighbors = append(neighbors, &Path{p: Point{X: p.p.X - 1, Y: p.p.Y}, g: p.g, height: p.height, width: p.width})
 	}
-	return Point{-1, -1}
-}*/
+	if p.p.X < p.width-1 && p.g[p.p.Y][p.p.X+1].t != SNAKE {
+		neighbors = append(neighbors, &Path{p: Point{X: p.p.X + 1, Y: p.p.Y}, g: p.g, height: p.height, width: p.width})
+	}
+	if p.p.Y > 0 && p.g[p.p.Y-1][p.p.X].t != SNAKE {
+		neighbors = append(neighbors, &Path{p: Point{X: p.p.X, Y: p.p.Y - 1}, g: p.g, height: p.height, width: p.width})
+	}
+	if p.p.Y > p.height-1 && p.g[p.p.Y+1][p.p.X].t != SNAKE {
+		neighbors = append(neighbors, &Path{p: Point{X: p.p.X, Y: p.p.Y + 1}, g: p.g, height: p.height, width: p.width})
+	}
+	return neighbors
+}
 
-func reconstruct_path(from Point, current Point) Point {
-	return Point{-1, -1}
+func (p *Path) PathNeighborCost(to astar.Pather) float64 {
+	return 1
+}
+func (p *Path) PathEstimatedCost(to astar.Pather) float64 {
+	return 1
+}
+
+func AStar(head Point, go_to Point, data *TurnData) (Point, bool) {
+	start := &Path{p: head, g: data.board, height: data.req.Height, width: data.req.Width}
+	end := &Path{p: go_to, g: data.board, height: data.req.Height, width: data.req.Width}
+	path, _, found := astar.Path(start, end)
+	if !found {
+		return Point{-1, -1}, false
+	}
+	return path[0].(*Path).p, true
 }
 
 func buildBoard(req *MoveRequest) (board [][]Cell) {
@@ -221,50 +230,20 @@ func findFood(data *TurnData) Dir {
 		}
 	}
 
-	x_dist := myhead.X - shortest.X
-	y_dist := myhead.Y - shortest.Y
+	p, found := AStar(myhead, shortest, data)
 
-	risky := Dir(-1)
-
-	if x_dist < 0 { // go right
-		safety := safeMove(data, RIGHT)
-		if safety == 2 {
-			return RIGHT
-		} else if safety == 1 && risky < 0 {
-			risky = RIGHT
-		}
-	}
-	if x_dist > 0 { // go left
-		safety := safeMove(data, LEFT)
-		if safety == 2 {
-			return LEFT
-		} else if safety == 1 && risky < 0 {
-			risky = LEFT
-		}
-	}
-	if y_dist < 0 { //go down
-		safety := safeMove(data, DOWN)
-		if safety == 2 {
-			return DOWN
-		} else if safety == 1 && risky < 0 {
-			risky = DOWN
-		}
-	}
-	if y_dist < 0 { //go down
-		safety := safeMove(data, UP)
-		if safety == 2 {
-			return UP
-		} else if safety == 1 && risky < 0 {
-			risky = UP
-		}
-	}
-
-	if risky < 0 {
+	if !found {
 		return firstSafeDir(data)
-	} else {
-		return risky
+	} else if p.X == myhead.X-1 {
+		return LEFT
+	} else if p.X == myhead.X+1 {
+		return RIGHT
+	} else if p.Y == myhead.Y-1 {
+		return UP
+	} else if p.Y == myhead.Y+1 {
+		return DOWN
 	}
-
+	return firstSafeDir(data)
 }
 
 func respond(res http.ResponseWriter, obj interface{}) {
