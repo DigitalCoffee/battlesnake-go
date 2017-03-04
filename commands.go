@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	//"fmt"
 	astar "github.com/beefsack/go-astar"
 	"net/http"
 )
@@ -235,7 +235,7 @@ func findFood(data *TurnData) Dir {
 
 	risky := Dir(-1)
 
-	if x_dist <= y_dist {
+	if abs(x_dist) > abs(y_dist) {
 		if x_dist < 0 { // go right
 			safety := safeMove(data, RIGHT)
 			if safety == 2 {
@@ -299,25 +299,11 @@ func respond(res http.ResponseWriter, obj interface{}) {
 }
 
 func handleStart(res http.ResponseWriter, req *http.Request) {
-	_, err := NewGameStartRequest(req)
-	if err != nil {
-		respond(res, GameStartResponse{
-			Taunt:   toStringPointer("Whoa dude"),
-			Color:   "#00FF00",
-			Name:    "Skate Fast Eat Gushers",
-			HeadUrl: toStringPointer(fmt.Sprintf("%v://%v/static/head.png")),
-		})
-	}
-
-	scheme := "http"
-	if req.TLS != nil {
-		scheme = "https"
-	}
 	respond(res, GameStartResponse{
-		Taunt:   toStringPointer("Whoa dude"),
-		Color:   "#00FF00",
-		Name:    "Skate Fast Eat Gushers",
-		HeadUrl: toStringPointer(fmt.Sprintf("%v://%v/static/head.png", scheme, req.Host)),
+		Taunt: toStringPointer("Whoa dude"),
+		Color: "#00FF00",
+		Name:  "Skate Fast Eat Gushers",
+		Head:  "shades",
 	})
 }
 
