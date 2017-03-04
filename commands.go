@@ -88,6 +88,7 @@ func (p *Path) PathEstimatedCost(to astar.Pather) float64 {
 	return 1
 }
 
+/*
 func AStar(head Point, go_to Point, data *TurnData) (Point, bool) {
 	start := &Path{p: head, g: data.board, height: data.req.Height, width: data.req.Width}
 	end := &Path{p: go_to, g: data.board, height: data.req.Height, width: data.req.Width}
@@ -96,6 +97,37 @@ func AStar(head Point, go_to Point, data *TurnData) (Point, bool) {
 		return Point{-1, -1}, false
 	}
 	return path[0].(*Path).p, true
+}*/
+/*
+func AStar(head Point, go_to Point, data TurnData) Point {
+	// Reference: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
+	//Setup
+	width := data.req.Width
+	height := data.req.Height
+	closedSet := []Point{}
+	openSet := []Point{head}
+	cameFrom := []Point{}
+	// cost to get to individual point
+	// access point as go_score[i][j] = go_score[i*width + j]
+	go_score := make([]int, height*width)
+	go_score[head.Y*width+head.X] = 0
+	//cost of travelling to go_to through the point
+	through_score := make([]int, height*width)
+	through_score[head.y*width+head.x] = heuristic_cost(head, go_to)
+	// Computation
+	for len(openSet) > 0 {
+		current := through_score[0] //the node in openSet having the lowest through_score[] value
+		if current == goal {
+			return reconstruct_path(cameFrom, current)
+		}
+		openSet = append(openSet[:current], openSet[current+1:])
+		closedSet = append(current)
+	}
+	return Point{-1, -1}
+}
+*/
+func reconstruct_path(from []Point, current Point) Point {
+	return Point{-1, -1}
 }
 
 func buildBoard(req *MoveRequest) (board [][]Cell) {
@@ -225,7 +257,7 @@ func findFood(data *TurnData) Dir {
 	}
 
 	for _, food := range food_list {
-		dist := food.X + food.Y - (myhead.X + myhead.Y)
+		dist := heuristic_cost(myhead, food)
 		if dist < short_dist || short_dist == -1 {
 			shortest = food
 			short_dist = dist
