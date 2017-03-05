@@ -15,7 +15,7 @@ type GameStartRequest struct {
 type GameStartResponse struct {
 	Color      string  `json:"color"`
 	Head       string  `json:"head_type,omitempty"`
-	Head_Image string  `json:"head_url,omitempty"`
+	Head_Image *string `json:"head_url,omitempty"`
 	Name       string  `json:"name"`
 	Taunt      *string `json:"taunt,omitempty"`
 }
