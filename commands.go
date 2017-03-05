@@ -367,7 +367,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 		Color:      "#00FF00",
 		Name:       "Skate Fast Eat Gushers",
 		Head:       "shades",
-		Head_Image: toStringPointer(fmt.Sprintf("%v://%v/static/head.png", scheme, req.Host)),
+		Head_Image: "https://sk8fast-eatgushers.herokuapp.com//static/head.png",
 	})
 }
 
