@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	astar "github.com/beefsack/go-astar"
 	"log"
 	"net/http"
@@ -362,12 +363,16 @@ func respond(res http.ResponseWriter, obj interface{}) {
 }
 
 func handleStart(res http.ResponseWriter, req *http.Request) {
+	scheme := "http"
+	if req.TLS != nil {
+		scheme = "https"
+	}
 	respond(res, GameStartResponse{
 		Taunt:      toStringPointer("Whoa dude"),
 		Color:      "#00FF00",
 		Name:       "Skate Fast Eat Gushers",
 		Head:       "shades",
-		Head_Image: "https://sk8fast-eatgushers.herokuapp.com//static/head.png",
+		Head_Image: toStringPointer(fmt.Sprintf("%v://%v/static/head.png", scheme, req.Host)),
 	})
 }
 
