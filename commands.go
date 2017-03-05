@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	//astar "github.com/beefsack/go-astar"
 	"fmt"
-	astar "github.com/beefsack/go-astar"
 	"log"
 	"net/http"
 	"time"
@@ -59,7 +59,7 @@ func heuristic_cost(start Point, end Point) int {
 
 }
 
-type Path struct {
+/*type Path struct {
 	p             Point
 	g             [][]Cell
 	height, width int
@@ -128,11 +128,11 @@ func AStar(head Point, go_to Point, data TurnData) Point {
 		closedSet = append(current)
 	}
 	return Point{-1, -1}
-}*/
+}
 
 func reconstruct_path(from []Point, current Point) Point {
 	return Point{-1, -1}
-}
+}*/
 
 func buildBoard(req *MoveRequest) (board [][]Cell) {
 	board = make([][]Cell, req.Width)
@@ -159,6 +159,84 @@ func getSnake(req *MoveRequest, id string) Snake {
 		}
 	}
 	return Snake{}
+}
+
+type Path struct {
+	Point
+	prev *Path
+	dir  Dir
+}
+
+func (p *Path) Len() int {
+	if p.prev == nil {
+		return 0
+	}
+	return p.prev.Len() + 1
+}
+
+func (p *Path) pointInPath(point Point) bool {
+	if p.Point == point {
+		return true
+	} else if p.prev == nil {
+		return false
+	} else {
+		return p.prev.pointInPath(point)
+	}
+}
+
+func cell(board [][]Cell, p Point) *Cell {
+	return &board[p.Y][p.X]
+}
+
+func bfs(data *TurnData, attack bool) Dir {
+	req := data.req
+	board := data.board
+
+	queue := make([]Path, 1, 10)
+	queue[0] = Path{Point: data.mysnake.Coords[0], prev: nil, dir: -1}
+
+	for len(queue) > 0 {
+		path := &queue[0]
+
+		if path.Len() > len(data.mysnake.Coords) {
+			found := false
+			for ; path.prev.dir != -1; path = path.prev {
+				c := cell(board, path.Point)
+				if attack {
+					if c.t == SNAKE && c.snake != data.mysnake.Id && c.pos < path.Len() {
+						found = true
+					}
+				} else {
+					if c.t == FOOD {
+						found = true
+					}
+				}
+			}
+			if found {
+				return path.dir
+			}
+		}
+		queue = queue[1:]
+
+		test := Point{X: path.X, Y: path.Y - 1}
+		if path.Y > 0 && (cell(board, test).t != SNAKE || cell(board, test).pos < path.Len()) && path.dir != DOWN && !path.pointInPath(test) {
+			queue = append(queue, Path{Point: test, prev: path, dir: UP})
+		}
+		test = Point{X: path.X, Y: path.Y + 1}
+		if path.Y < req.Height-1 && (cell(board, test).t != SNAKE || cell(board, test).pos < path.Len()) && path.dir != UP && !path.pointInPath(test) {
+			queue = append(queue, Path{Point: test, prev: path, dir: DOWN})
+		}
+		test = Point{X: path.X - 1, Y: path.Y}
+		if path.X > 0 && (cell(board, test).t != SNAKE || cell(board, test).pos < path.Len()) && path.dir != RIGHT && !path.pointInPath(test) {
+			queue = append(queue, Path{Point: test, prev: path, dir: LEFT})
+		}
+		test = Point{X: path.X + 1, Y: path.Y}
+		if path.X < req.Width-1 && (cell(board, test).t != SNAKE || cell(board, test).pos < path.Len()) && path.dir != LEFT && !path.pointInPath(test) {
+			queue = append(queue, Path{Point: test, prev: path, dir: RIGHT})
+		}
+
+	}
+	return UP
 }
 
 func safeMove(data *TurnData, dir Dir) int {
@@ -315,6 +393,7 @@ func target(data *TurnData, t Point) Dir {
 		return firstSafeDir(data)*/
 }
 
+/*
 func findFood(data *TurnData) Dir {
 	shortest := Point{-1, -1}
 	food_list := data.req.Food
@@ -335,7 +414,7 @@ func findFood(data *TurnData) Dir {
 	}
 
 	return target(data, shortest)
-}
+}*/
 
 func findEnemy(data *TurnData) Dir {
 	shortest := Point{-1, -1}
@@ -372,7 +451,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 		Color:      "#00FF00",
 		Name:       "Skate Fast Eat Gushers",
 		Head:       "shades",
-		Head_Image: toStringPointer(fmt.Sprintf("%v://%v/static/head.png", scheme, req.Host)),
+		Head_Image: toStringPointer(fmt.Sprintf("%v://%v/head.png", scheme, req.Host)),
 	})
 }
 
@@ -400,11 +479,12 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 	var dir Dir
-	if attack {
+	/*if attack {
 		dir = findEnemy(turnData)
 	} else {
 		dir = findFood(turnData)
-	}
+	}*/
+	dir = bfs(turnData, attack)
 
 	respond(res, MoveResponse{
 		Move:  directions[dir],
