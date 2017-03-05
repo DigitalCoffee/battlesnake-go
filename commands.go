@@ -200,7 +200,7 @@ func bfs(data *TurnData, attack bool) Dir {
 
 		if path.Len() > len(data.mysnake.Coords) {
 			found := false
-			for ; path.prev.dir != -1; path = path.prev {
+			for ; path.prev.prev != nil; path = path.prev {
 				c := cell(board, path.Point)
 				if attack {
 					if c.t == SNAKE && c.snake != data.mysnake.Id && c.pos < path.Len() {
@@ -236,8 +236,8 @@ func bfs(data *TurnData, attack bool) Dir {
 		}
 
 	}
-	dir, _ := firstSafeDir(data)
-	return dir
+
+	return findFood(data)
 }
 
 func safeMove(data *TurnData, dir Dir) int {
@@ -394,7 +394,6 @@ func target(data *TurnData, t Point) Dir {
 		return firstSafeDir(data)*/
 }
 
-/*
 func findFood(data *TurnData) Dir {
 	shortest := Point{-1, -1}
 	food_list := data.req.Food
@@ -415,7 +414,7 @@ func findFood(data *TurnData) Dir {
 	}
 
 	return target(data, shortest)
-}*/
+}
 
 func findEnemy(data *TurnData) Dir {
 	shortest := Point{-1, -1}
@@ -480,12 +479,12 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 	var dir Dir
-	/*if attack {
+	if attack {
 		dir = findEnemy(turnData)
 	} else {
 		dir = findFood(turnData)
-	}*/
-	dir = bfs(turnData, attack)
+	}
+	//dir = bfs(turnData, attack)
 
 	respond(res, MoveResponse{
 		Move:  directions[dir],
