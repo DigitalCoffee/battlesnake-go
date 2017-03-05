@@ -98,6 +98,7 @@ func AStar(head Point, go_to Point, data *TurnData) (Point, bool) {
 	}
 	return path[0].(*Path).p, true
 }*/
+
 /*
 func AStar(head Point, go_to Point, data TurnData) Point {
 	// Reference: https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
@@ -116,6 +117,8 @@ func AStar(head Point, go_to Point, data TurnData) Point {
 	through_score[head.y*width+head.x] = heuristic_cost(head, go_to)
 	// Computation
 	for len(openSet) > 0 {
+
+
 		current := through_score[0] //the node in openSet having the lowest through_score[] value
 		if current == goal {
 			return reconstruct_path(cameFrom, current)
@@ -124,8 +127,8 @@ func AStar(head Point, go_to Point, data TurnData) Point {
 		closedSet = append(current)
 	}
 	return Point{-1, -1}
-}
-*/
+}*/
+
 func reconstruct_path(from []Point, current Point) Point {
 	return Point{-1, -1}
 }
@@ -245,27 +248,10 @@ func firstSafeDir(data *TurnData) (Dir, int) {
 	return risky, 1
 }
 
-func findFood(data *TurnData) Dir {
-	shortest := Point{-1, -1}
-	food_list := data.req.Food
+func target(data *TurnData, t Point) Dir {
 	myhead := data.mysnake.Coords[0]
-	short_dist := -1
-
-	if len(food_list) == 0 {
-		dir, _ := firstSafeDir(data)
-		return dir
-	}
-
-	for _, food := range food_list {
-		dist := heuristic_cost(myhead, food)
-		if dist < short_dist || short_dist == -1 {
-			shortest = food
-			short_dist = dist
-		}
-	}
-
-	x_dist := myhead.X - shortest.X
-	y_dist := myhead.Y - shortest.Y
+	x_dist := myhead.X - t.X
+	y_dist := myhead.Y - t.Y
 
 	risky := Dir(-1)
 
@@ -328,6 +314,48 @@ func findFood(data *TurnData) Dir {
 		return firstSafeDir(data)*/
 }
 
+func findFood(data *TurnData) Dir {
+	shortest := Point{-1, -1}
+	food_list := data.req.Food
+	myhead := data.mysnake.Coords[0]
+	short_dist := -1
+
+	if len(food_list) == 0 {
+		dir, _ := firstSafeDir(data)
+		return dir
+	}
+
+	for _, food := range food_list {
+		dist := heuristic_cost(myhead, food)
+		if dist < short_dist || short_dist == -1 {
+			shortest = food
+			short_dist = dist
+		}
+	}
+
+	return target(data, shortest)
+}
+
+func findEnemy(data *TurnData) Dir {
+	shortest := Point{-1, -1}
+	snake_list := data.req.Snakes
+	myhead := data.mysnake.Coords[0]
+	short_dist := -1
+
+	for _, snake := range snake_list {
+		if snake.Id == data.mysnake.Id {
+			continue
+		}
+		dist := heuristic_cost(myhead, snake.Coords[0])
+		if dist < short_dist || short_dist == -1 {
+			shortest = snake.Coords[0]
+			short_dist = dist
+		}
+	}
+
+	return target(data, shortest)
+}
+
 func respond(res http.ResponseWriter, obj interface{}) {
 	res.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(res).Encode(obj)
@@ -335,10 +363,11 @@ func respond(res http.ResponseWriter, obj interface{}) {
 
 func handleStart(res http.ResponseWriter, req *http.Request) {
 	respond(res, GameStartResponse{
-		Taunt: toStringPointer("Whoa dude"),
-		Color: "#00FF00",
-		Name:  "Skate Fast Eat Gushers",
-		Head:  "shades",
+		Taunt:      toStringPointer("Whoa dude"),
+		Color:      "#00FF00",
+		Name:       "Skate Fast Eat Gushers",
+		Head:       "shades",
+		Head_Image: "",
 	})
 }
 
@@ -356,7 +385,21 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 	snake := getSnake(data, data.You)
 	turnData := &TurnData{req: data, board: buildBoard(data), mysnake: &snake}
 
-	dir := findFood(turnData)
+	attack := false
+	if snake.HealthPoints > 50 {
+		attack = true
+		for _, s := range data.Snakes {
+			if s.Id != data.You && len(s.Coords) > len(snake.Coords) {
+				attack = false
+			}
+		}
+	}
+	var dir Dir
+	if attack {
+		dir = findEnemy(turnData)
+	} else {
+		dir = findFood(turnData)
+	}
 
 	respond(res, MoveResponse{
 		Move:  directions[dir],
