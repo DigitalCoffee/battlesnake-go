@@ -484,12 +484,12 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 	var dir Dir
-	/*if attack {
+	if attack {
 		dir = findEnemy(turnData)
 	} else {
 		dir = findFood(turnData)
-	}*/
-	dir = bfs(turnData, attack)
+	}
+	//dir = bfs(turnData, attack)
 
 	respond(res, MoveResponse{
 		Move:  directions[dir],
