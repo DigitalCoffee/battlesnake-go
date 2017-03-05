@@ -198,7 +198,7 @@ func bfs(data *TurnData, attack bool) Dir {
 	for len(queue) > 0 {
 		path := &queue[0]
 
-		if path.Len() > len(data.mysnake.Coords) {
+		if path.Len() > data.req.Width+data.req.Height {
 			found := false
 			for ; path.prev.prev != nil; path = path.prev {
 				c := cell(board, path.Point)
@@ -237,7 +237,11 @@ func bfs(data *TurnData, attack bool) Dir {
 
 	}
 
-	return findFood(data)
+	if attack {
+		return findEnemy(data)
+	} else {
+		return findFood(data)
+	}
 }
 
 func safeMove(data *TurnData, dir Dir) int {
@@ -451,6 +455,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 		Color:      "#00FF00",
 		Name:       "Skate Fast Eat Gushers",
 		Head:       "shades",
+		Tail:       "curled",
 		Head_Image: toStringPointer(fmt.Sprintf("%v://%v/head.png", scheme, req.Host)),
 	})
 }
@@ -479,12 +484,12 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 	var dir Dir
-	if attack {
+	/*if attack {
 		dir = findEnemy(turnData)
 	} else {
 		dir = findFood(turnData)
-	}
-	//dir = bfs(turnData, attack)
+	}*/
+	dir = bfs(turnData, attack)
 
 	respond(res, MoveResponse{
 		Move:  directions[dir],
