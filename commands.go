@@ -367,7 +367,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 		Color:      "#00FF00",
 		Name:       "Skate Fast Eat Gushers",
 		Head:       "shades",
-		Head_Image: "",
+		Head_Image: "https://drive.google.com/file/d/0B1v_pC3dtFCHX1VtaDNnZC1VaUE/view?usp=sharing",
 	})
 }
 
