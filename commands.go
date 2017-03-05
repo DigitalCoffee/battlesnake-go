@@ -386,14 +386,14 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 	turnData := &TurnData{req: data, board: buildBoard(data), mysnake: &snake}
 
 	attack := false
-	if snake.HealthPoints > 50 {
+	//if snake.HealthPoints > 50 {
 		attack = true
 		for _, s := range data.Snakes {
 			if s.Id != data.You && len(s.Coords) > len(snake.Coords) {
 				attack = false
 			}
 		}
-	}
+	//}
 	var dir Dir
 	if attack {
 		dir = findEnemy(turnData)
