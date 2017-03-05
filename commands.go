@@ -367,7 +367,7 @@ func handleStart(res http.ResponseWriter, req *http.Request) {
 		Color:      "#00FF00",
 		Name:       "Skate Fast Eat Gushers",
 		Head:       "shades",
-		Head_Image: "https://drive.google.com/file/d/0B1v_pC3dtFCHX1VtaDNnZC1VaUE/view?usp=sharing",
+		Head_Image: "",
 	})
 }
 
@@ -386,14 +386,14 @@ func handleMove(res http.ResponseWriter, req *http.Request) {
 	turnData := &TurnData{req: data, board: buildBoard(data), mysnake: &snake}
 
 	attack := false
-	//if snake.HealthPoints > 50 {
+	if snake.HealthPoints > 25 {
 		attack = true
 		for _, s := range data.Snakes {
-			if s.Id != data.You && len(s.Coords) > len(snake.Coords) {
+			if s.Id != data.You && len(s.Coords) >= len(snake.Coords) {
 				attack = false
 			}
 		}
-	//}
+	}
 	var dir Dir
 	if attack {
 		dir = findEnemy(turnData)
