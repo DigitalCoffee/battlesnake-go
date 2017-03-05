@@ -236,7 +236,8 @@ func bfs(data *TurnData, attack bool) Dir {
 		}
 
 	}
-	return UP
+	dir, _ := firstSafeDir(data)
+	return dir
 }
 
 func safeMove(data *TurnData, dir Dir) int {
